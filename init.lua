@@ -723,6 +723,7 @@ do
     -- gopls = {},
     -- pyright = {},
      rust_analyzer = {},
+     -- sourcekit = {},
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
     --    https://github.com/pmizio/typescript-tools.nvim
@@ -797,6 +798,9 @@ do
     vim.lsp.config(name, server)
     vim.lsp.enable(name)
   end
+  -- Manually setup sourcekit using the new Neovim 0.11 API so Mason ignores it *
+  vim.lsp.config('sourcekit', {})
+  vim.lsp.enable('sourcekit')
 end
 
 -- ============================================================
@@ -1019,6 +1023,27 @@ do
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   -- require 'custom.plugins'
+  -- [[ iOS Development ]] *
+  vim.pack.add {
+    gh 'wojciech-kulik/xcodebuild.nvim',
+    gh 'nvim-telescope/telescope.nvim', -- You already have this, but xcodebuild needs it
+    gh 'MunifTanjim/nui.nvim', -- You already have this from neo-tree!
+    -- gh 'folke/snacks.nvim', -- ADD THIS: Required for SwiftUI Previews
+  }
+
+  require('xcodebuild').setup {
+    show_build_progress_bar = true,
+    code_coverage = {
+      enabled = true,
+    },
+  }
+
+  -- Keymaps for iOS
+  vim.keymap.set('n', '<leader>Xb', '<cmd>XcodebuildBuild<cr>', { desc = '[X]code [B]uild' })
+  vim.keymap.set('n', '<leader>Xr', '<cmd>XcodebuildBuildRun<cr>', { desc = '[X]code Build & [R]un' })
+  vim.keymap.set('n', '<leader>Xs', '<cmd>XcodebuildSelectDevice<cr>', { desc = '[X]code [S]elect Device' })
+-- ADD THIS: Hotkey to toggle the SwiftUI Canvas Preview
+  -- vim.keymap.set('n', '<leader>Xp', '<cmd>XcodebuildPreviewToggle<cr>', { desc = '[X]code [P]review Toggle' })
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
