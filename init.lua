@@ -238,13 +238,13 @@ do
   vim.keymap.set('n', '<C-.>', ':bn<CR>', { desc = 'Go to next buffer' })
   vim.keymap.set('n', '<C-,>', ':bp<CR>', { desc = 'Go to previous buffer' })
 
--- Create a custom command to run Cargo in a small bottom terminal *
+  -- Create a custom command to run Cargo in a small bottom terminal *
   vim.api.nvim_create_user_command('CargoRun', function()
     vim.cmd 'botright 15split' -- botright forces it to the very bottom, 15 is the height
     vim.cmd 'term cargo run'
     vim.cmd 'startinsert' -- automatically enter terminal mode so you can type
   end, { desc = 'Run cargo in a bottom terminal split' })
--- Hotkey to open a small blank terminal at the bottom *
+  -- Hotkey to open a small blank terminal at the bottom *
   vim.keymap.set('n', '<leader>tt', function()
     vim.cmd 'botright 15split'
     vim.cmd 'term'
@@ -405,8 +405,9 @@ do
   require('tokyonight').setup {
     styles = {
       comments = { italic = false }, -- Disable italics in comment
-      keywords = { bold = true , italic = false },    -- Make keywords bold
+      keywords = { bold = true, italic = false }, -- Make keywords bold
       functions = { bold = true, italic = true }, -- Make functions bold and italics
+      operators = { italic = false, bold = false },
     },
   }
 
@@ -539,15 +540,20 @@ do
   vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
   vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
   -- My keymap for searching all my coding directories *
-  vim.keymap.set('n', '<leader>sa', function()
-    builtin.find_files {
-      search_dirs = {
-        '~/Learning/',
-        '~/Projects/Apple _Apps/'
-      },
-        hidden = false
-    }
-  end, { desc = '[S]earch [A]ll (Home Directory)' })
+  vim.keymap.set(
+    'n',
+    '<leader>sa',
+    function()
+      builtin.find_files {
+        search_dirs = {
+          '~/Learning/',
+          '~/Projects/Apple _Apps/',
+        },
+        hidden = false,
+      }
+    end,
+    { desc = '[S]earch [A]ll (Home Directory)' }
+  )
 
   vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
   vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
@@ -724,8 +730,8 @@ do
     -- clangd = {},
     -- gopls = {},
     -- pyright = {},
-     rust_analyzer = {},
-     -- sourcekit = {},
+    rust_analyzer = {},
+    -- sourcekit = {},
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
     --    https://github.com/pmizio/typescript-tools.nvim
@@ -802,7 +808,7 @@ do
   end
   -- Manually setup sourcekit using the new Neovim 0.11 API so Mason ignores it *
   vim.lsp.config('sourcekit', {})
-  vim.lsp.enable('sourcekit')
+  vim.lsp.enable 'sourcekit'
 end
 
 -- ============================================================
@@ -889,11 +895,11 @@ do
       -- See `:help blink-cmp-config-keymap` for defining your own keymap
       preset = 'default',
 
--- Overwrite Enter to accept the suggestion. If menu is closed, fallback to normal Enter. *
+      -- Overwrite Enter to accept the suggestion. If menu is closed, fallback to normal Enter. *
       ['<CR>'] = { 'accept', 'fallback' },
 
-      -- Overwrite Tab to accept the suggestion. 
-      -- 'snippet_forward' means if you are filling out a function's arguments, 
+      -- Overwrite Tab to accept the suggestion.
+      -- 'snippet_forward' means if you are filling out a function's arguments,
       -- Tab will jump to the next argument after accepting.
       ['<Tab>'] = { 'accept', 'snippet_forward', 'fallback' },
 
@@ -947,7 +953,7 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed *
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust' , 'swift' }
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust', 'swift' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -993,10 +999,10 @@ do
       end
     end,
   })
--- Pin function/class/struct headers to the top of the window
+  -- Pin function/class/struct headers to the top of the window
   vim.pack.add { gh 'nvim-treesitter/nvim-treesitter-context' }
   require('treesitter-context').setup {
-  mode = 'topline', -- Calculates context based on the top of the window, not the cursor
+    mode = 'topline', -- Calculates context based on the top of the window, not the cursor
   }
 end
 
@@ -1044,7 +1050,7 @@ do
   vim.keymap.set('n', '<leader>Xb', '<cmd>XcodebuildBuild<cr>', { desc = '[X]code [B]uild' })
   vim.keymap.set('n', '<leader>Xr', '<cmd>XcodebuildBuildRun<cr>', { desc = '[X]code Build & [R]un' })
   vim.keymap.set('n', '<leader>Xs', '<cmd>XcodebuildSelectDevice<cr>', { desc = '[X]code [S]elect Device' })
--- ADD THIS: Hotkey to toggle the SwiftUI Canvas Preview
+  -- ADD THIS: Hotkey to toggle the SwiftUI Canvas Preview
   -- vim.keymap.set('n', '<leader>Xp', '<cmd>XcodebuildPreviewToggle<cr>', { desc = '[X]code [P]review Toggle' })
 end
 
