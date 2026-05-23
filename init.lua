@@ -110,7 +110,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -233,6 +233,23 @@ do
   -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
   -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
   -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+
+  -- MY KEY BINDINGS *
+  vim.keymap.set('n', '<C-.>', ':bn<CR>', { desc = 'Go to next buffer' })
+  vim.keymap.set('n', '<C-,>', ':bp<CR>', { desc = 'Go to previous buffer' })
+
+-- Create a custom command to run Cargo in a small bottom terminal *
+  vim.api.nvim_create_user_command('CargoRun', function()
+    vim.cmd 'botright 15split' -- botright forces it to the very bottom, 15 is the height
+    vim.cmd 'term cargo run'
+    vim.cmd 'startinsert' -- automatically enter terminal mode so you can type
+  end, { desc = 'Run cargo in a bottom terminal split' })
+-- Hotkey to open a small blank terminal at the bottom *
+  vim.keymap.set('n', '<leader>tt', function()
+    vim.cmd 'botright 15split'
+    vim.cmd 'term'
+    vim.cmd 'startinsert'
+  end, { desc = '[T]oggle bottom [T]erminal' })
 
   -- [[ Basic Autocommands ]]
   --  See `:help lua-guide-autocommands`
@@ -438,7 +455,12 @@ do
   -- cursor location to LINE:COLUMN
   ---@diagnostic disable-next-line: duplicate-set-field
   statusline.section_location = function() return '%2l:%-2v' end
+  -- [[ UndoTree ]] *
+  -- Visualizes Neovim's powerful branching undo history
+  vim.pack.add { gh 'mbbill/undotree' }
 
+  -- Match Primeagen's classic keybinding for toggling the tree
+  vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle, { desc = 'Toggle [U]ndo tree' })
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
 end
@@ -514,6 +536,17 @@ do
   vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
   vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
   vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+  -- My keymap for searching all my coding directories *
+  vim.keymap.set('n', '<leader>sa', function()
+    builtin.find_files {
+      search_dirs = {
+        '~/Learning/',
+        '~/Projects/Apple _Apps/'
+      },
+        hidden = false
+    }
+  end, { desc = '[S]earch [A]ll (Home Directory)' })
+
   vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
   vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
@@ -689,7 +722,7 @@ do
     -- clangd = {},
     -- gopls = {},
     -- pyright = {},
-    -- rust_analyzer = {},
+     rust_analyzer = {},
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
     --    https://github.com/pmizio/typescript-tools.nvim
@@ -709,6 +742,8 @@ do
           if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
         end
 
+        -- I added this line. MY ADDITION
+        ---@diagnostic disable-next-line: param-type-mismatch
         client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
           runtime = {
             version = 'LuaJIT',
@@ -848,6 +883,14 @@ do
       -- See `:help blink-cmp-config-keymap` for defining your own keymap
       preset = 'default',
 
+-- Overwrite Enter to accept the suggestion. If menu is closed, fallback to normal Enter. *
+      ['<CR>'] = { 'accept', 'fallback' },
+
+      -- Overwrite Tab to accept the suggestion. 
+      -- 'snippet_forward' means if you are filling out a function's arguments, 
+      -- Tab will jump to the next argument after accepting.
+      ['<Tab>'] = { 'accept', 'snippet_forward', 'fallback' },
+
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
     },
@@ -897,8 +940,8 @@ do
   -- NOTE: You can also specify a branch or a specific commit
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
-  -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  -- Ensure basic parsers are installed *
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust' , 'swift' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -944,6 +987,11 @@ do
       end
     end,
   })
+-- Pin function/class/struct headers to the top of the window
+  vim.pack.add { gh 'nvim-treesitter/nvim-treesitter-context' }
+  require('treesitter-context').setup {
+  mode = 'topline', -- Calculates context based on the top of the window, not the cursor
+  }
 end
 
 -- ============================================================
@@ -964,7 +1012,7 @@ do
   -- require 'kickstart.plugins.indent_line'
   -- require 'kickstart.plugins.lint'
   -- require 'kickstart.plugins.autopairs'
-  -- require 'kickstart.plugins.neo-tree'
+  require 'kickstart.plugins.neo-tree'
   -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
