@@ -405,7 +405,7 @@ do
   require('tokyonight').setup {
     styles = {
       comments = { italic = false }, -- Disable italics in comment
-      keywords = { bold = true },    -- Make keywords bold
+      keywords = { bold = true , italic = false },    -- Make keywords bold
       functions = { bold = true, italic = true }, -- Make functions bold and italics
     },
   }
