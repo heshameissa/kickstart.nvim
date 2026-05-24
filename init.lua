@@ -836,7 +836,7 @@ do
     vim.lsp.enable(name)
   end
   -- Manually setup sourcekit using the new Neovim 0.11 API so Mason ignores it *
-  vim.lsp.config('sourcekit', {})
+  -- vim.lsp.config('sourcekit', {})
   vim.lsp.enable 'sourcekit'
 end
 
@@ -894,8 +894,8 @@ do
   --    See the README about individual language/framework/plugin snippets:
   --    https://github.com/rafamadriz/friendly-snippets
   --
-  -- vim.pack.add { gh 'rafamadriz/friendly-snippets' }
-  -- require('luasnip.loaders.from_vscode').lazy_load()
+  vim.pack.add { gh 'rafamadriz/friendly-snippets' }
+  require('luasnip.loaders.from_vscode').lazy_load()
 
   -- [[ Autocomplete Engine ]]
   vim.pack.add { { src = gh 'saghen/blink.cmp', version = vim.version.range '1.*' } }
