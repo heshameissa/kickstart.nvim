@@ -897,6 +897,47 @@ do
   vim.pack.add { gh 'rafamadriz/friendly-snippets' }
   require('luasnip.loaders.from_vscode').lazy_load()
 
+  -- [ADD CO-PILOT] *
+  vim.pack.add { gh 'zbirenbaum/copilot.lua' }
+
+
+  require('copilot').setup {
+    suggestion = {
+      enabled = true,
+      auto_trigger = true, -- Automatically show ghost text as you type
+      keymap = {
+        accept = "<C-f>", -- Press Ctrl+f to accept the AI suggestion
+        next = "<M-]>",   -- Press Ctrl+] to cycle to the next AI suggestion
+        prev = "<M-[>",   -- Press Ctrl+[ to cycle to the previous AI suggestion
+        dismiss = "<C-e>",-- Press Ctrl+e to reject the suggestion
+      },
+    },
+    panel = { enabled = false }, -- We don't want the clunky side-panel
+    -- ADD THIS BLOCK TO DISABLE TELEMETRY
+    server_opts_overrides = {
+      settings = {
+        telemetry = {
+          telemetryLevel = "off",
+        },
+      },
+    },
+  }
+
+  -- [[ Requirement 5: The Privacy Toggle ]] *
+  -- Pressing Space + c + p will instantly sever the connection to GitHub
+  vim.keymap.set('n', '<leader>cp', function()
+    local copilot = require("copilot.command")
+    if vim.b.copilot_disabled then
+      copilot.enable()
+      vim.b.copilot_disabled = false
+      print("Copilot Enabled")
+    else
+      copilot.disable()
+      vim.b.copilot_disabled = true
+      print("Copilot Disabled (Privacy Mode)")
+    end
+  end, { desc = '[C]opilot [P]rivacy Toggle' })
+
   -- [[ Autocomplete Engine ]]
   vim.pack.add { { src = gh 'saghen/blink.cmp', version = vim.version.range '1.*' } }
   require('blink.cmp').setup {
@@ -931,6 +972,13 @@ do
       -- 'snippet_forward' means if you are filling out a function's arguments,
       -- Tab will jump to the next argument after accepting.
       ['<Tab>'] = { 'accept', 'snippet_forward', 'fallback' },
+
+      -- Use Ctrl+j and Ctrl+k to navigate up and down menus *
+      ['<C-j>'] = { 'select_next', 'fallback' },
+      ['<C-k>'] = { 'select_prev', 'fallback' },
+
+      -- We stole Ctrl+k, so let's remap the manual Signature toggle to Ctrl+s
+      ['<C-s>'] = { 'show_signature', 'hide_signature', 'fallback' },
 
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
