@@ -1037,7 +1037,11 @@ do
     gh 'wojciech-kulik/xcodebuild.nvim',
     gh 'nvim-telescope/telescope.nvim', -- You already have this, but xcodebuild needs it
     gh 'MunifTanjim/nui.nvim', -- You already have this from neo-tree!
-    -- gh 'folke/snacks.nvim', -- ADD THIS: Required for SwiftUI Previews
+
+    -- The Debugging Engine & UI
+    gh 'mfussenegger/nvim-dap',
+    gh 'rcarriga/nvim-dap-ui',
+    gh 'nvim-neotest/nvim-nio',
   }
 
   require('xcodebuild').setup {
@@ -1047,12 +1051,44 @@ do
     },
   }
 
+  require('xcodebuild').setup {
+    show_build_progress_bar = true,
+    code_coverage = { enabled = true },
+    integrations = {
+      dap = {
+        lldb_path = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lldb-dap",
+      },
+    },
+  }
+  -- [[ Setup DAP UI ]]
+  local dap, dapui = require 'dap', require 'dapui'
+  dapui.setup()
+
+  -- Automatically open/close the debugger UI when a session starts/stops
+  dap.listeners.before.attach.dapui_config = function() dapui.open() end
+  dap.listeners.before.launch.dapui_config = function() dapui.open() end
+  dap.listeners.before.event_terminated.dapui_config = function() dapui.close() end
+  dap.listeners.before.event_exited.dapui_config = function() dapui.close() end
+
+  -- [[ Use Apple's Native lldb-dap for Swift 6.0+ ]]
+  local xcodebuild_dap = require 'xcodebuild.integrations.dap'
+  xcodebuild_dap.setup()
+
+
   -- Keymaps for iOS
   vim.keymap.set('n', '<leader>Xb', '<cmd>XcodebuildBuild<cr>', { desc = '[X]code [B]uild' })
   vim.keymap.set('n', '<leader>Xr', '<cmd>XcodebuildBuildRun<cr>', { desc = '[X]code Build & [R]un' })
   vim.keymap.set('n', '<leader>Xs', '<cmd>XcodebuildSelectDevice<cr>', { desc = '[X]code [S]elect Device' })
-  -- ADD THIS: Hotkey to toggle the SwiftUI Canvas Preview
-  -- vim.keymap.set('n', '<leader>Xp', '<cmd>XcodebuildPreviewToggle<cr>', { desc = '[X]code [P]review Toggle' })
+
+  -- Keymaps for iOS Debugging
+  vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = '[D]ebug Toggle [B]reakpoint' })
+  vim.keymap.set('n', '<leader>dd', xcodebuild_dap.build_and_debug, { desc = '[D]ebug: Build & [D]ebug' })
+  vim.keymap.set('n', '<leader>dc', dap.continue, { desc = '[D]ebug [C]ontinue' })
+  vim.keymap.set('n', '<leader>ds', dap.step_over, { desc = '[D]ebug [S]tep Over' })
+  vim.keymap.set('n', '<leader>di', dap.step_into, { desc = '[D]ebug Step [I]nto' })
+  vim.keymap.set('n', '<leader>dq', dap.terminate, { desc = '[D]ebug [Q]uit' })
+  vim.keymap.set('n', '<leader>dx', function() require("dapui").close() end, { desc = '[D]ebug E[x]it UI' })
+
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
