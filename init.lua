@@ -466,6 +466,33 @@ do
   vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle, { desc = 'Toggle [U]ndo tree' })
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
+  --
+
+  -- [[ Rust Development ]] *
+  vim.pack.add {
+    gh 'mrcjkb/rustaceanvim', -- The ultimate Rust LSP & Debugging engine
+    gh 'Saecki/crates.nvim', -- Cargo.toml version autocomplete
+  }
+
+  -- Initialize the crates plugin
+  require('crates').setup()
+
+  -- Tell rustaceanvim to automatically use the codelldb debugger from Mason
+  vim.g.rustaceanvim = function()
+    local extension_path = vim.env.HOME .. '/.local/share/nvim/mason/packages/codelldb/extension/'
+    local codelldb_path = extension_path .. 'adapter/codelldb'
+    local liblldb_path = extension_path .. 'lldb/lib/liblldb.dylib'
+    local cfg = require 'rustaceanvim.config'
+
+    return {
+      dap = {
+        adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
+      },
+    }
+  end
+
+  -- Hotkey to debug Rust Tests (Space + d + t)
+  vim.keymap.set('n', '<leader>dt', function() vim.cmd.RustLsp 'debuggables' end, { desc = '[D]ebug Rust [T]est' })
 end
 
 -- ============================================================
@@ -730,7 +757,7 @@ do
     -- clangd = {},
     -- gopls = {},
     -- pyright = {},
-    rust_analyzer = {},
+    -- rust_analyzer = {},
     -- sourcekit = {},
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -799,6 +826,7 @@ do
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
     'xcode-build-server', -- Force Mason to sync this via Git! *
+    'codelldb',
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -838,7 +866,7 @@ do
     },
     -- You can also specify external formatters in here.
     formatters_by_ft = {
-      -- rust = { 'rustfmt' },
+      rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
@@ -1056,7 +1084,7 @@ do
     code_coverage = { enabled = true },
     integrations = {
       dap = {
-        lldb_path = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lldb-dap",
+        lldb_path = '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lldb-dap',
       },
     },
   }
@@ -1074,7 +1102,6 @@ do
   local xcodebuild_dap = require 'xcodebuild.integrations.dap'
   xcodebuild_dap.setup()
 
-
   -- Keymaps for iOS
   vim.keymap.set('n', '<leader>Xb', '<cmd>XcodebuildBuild<cr>', { desc = '[X]code [B]uild' })
   vim.keymap.set('n', '<leader>Xr', '<cmd>XcodebuildBuildRun<cr>', { desc = '[X]code Build & [R]un' })
@@ -1087,8 +1114,9 @@ do
   vim.keymap.set('n', '<leader>ds', dap.step_over, { desc = '[D]ebug [S]tep Over' })
   vim.keymap.set('n', '<leader>di', dap.step_into, { desc = '[D]ebug Step [I]nto' })
   vim.keymap.set('n', '<leader>dq', dap.terminate, { desc = '[D]ebug [Q]uit' })
-  vim.keymap.set('n', '<leader>dx', function() require("dapui").close() end, { desc = '[D]ebug E[x]it UI' })
-
+  vim.keymap.set('n', '<leader>dx', function() require('dapui').close() end, { desc = '[D]ebug E[x]it UI' })
+  -- Hotkey to debug Rust Tests (Space + d + t)
+  vim.keymap.set('n', '<leader>dt', function() vim.cmd.RustLsp 'debuggables' end, { desc = '[D]ebug Rust [T]est' })
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
