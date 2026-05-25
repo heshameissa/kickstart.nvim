@@ -118,6 +118,12 @@ do
   -- Don't show the mode, since it's already in the status line
   vim.o.showmode = false
 
+  -- Wrap long lines instead of scrolling horizontally *
+  vim.o.wrap = true
+
+  -- Ensure words aren't chopped in half when wrapping *
+  vim.o.linebreak = true
+
   -- Sync clipboard between OS and Neovim.
   --  Schedule the setting after `UiEnter` because it can increase startup-time.
   --  Remove this option if you want your OS clipboard to remain independent.
@@ -174,6 +180,10 @@ do
 
   -- [[ Basic Keymaps ]]
   --  See `:help vim.keymap.set()`
+
+  -- Keep cursor centered when scrolling half pages *
+  vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Scroll down and center' })
+  vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Scroll up and center' })
 
   -- Clear highlights on search when pressing <Esc> in normal mode
   --  See `:help hlsearch`
@@ -900,16 +910,15 @@ do
   -- [ADD CO-PILOT] *
   vim.pack.add { gh 'zbirenbaum/copilot.lua' }
 
-
   require('copilot').setup {
     suggestion = {
       enabled = true,
       auto_trigger = true, -- Automatically show ghost text as you type
       keymap = {
-        accept = "<C-f>", -- Press Ctrl+f to accept the AI suggestion
-        next = "<M-]>",   -- Press Ctrl+] to cycle to the next AI suggestion
-        prev = "<M-[>",   -- Press Ctrl+[ to cycle to the previous AI suggestion
-        dismiss = "<C-e>",-- Press Ctrl+e to reject the suggestion
+        accept = '<C-f>', -- Press Ctrl+f to accept the AI suggestion
+        next = '<M-]>', -- Press Ctrl+] to cycle to the next AI suggestion
+        prev = '<M-[>', -- Press Ctrl+[ to cycle to the previous AI suggestion
+        dismiss = '<C-e>', -- Press Ctrl+e to reject the suggestion
       },
     },
     panel = { enabled = false }, -- We don't want the clunky side-panel
@@ -917,7 +926,7 @@ do
     server_opts_overrides = {
       settings = {
         telemetry = {
-          telemetryLevel = "off",
+          telemetryLevel = 'off',
         },
       },
     },
@@ -926,15 +935,15 @@ do
   -- [[ Requirement 5: The Privacy Toggle ]] *
   -- Pressing Space + c + p will instantly sever the connection to GitHub
   vim.keymap.set('n', '<leader>cp', function()
-    local copilot = require("copilot.command")
+    local copilot = require 'copilot.command'
     if vim.b.copilot_disabled then
       copilot.enable()
       vim.b.copilot_disabled = false
-      print("Copilot Enabled")
+      print 'Copilot Enabled'
     else
       copilot.disable()
       vim.b.copilot_disabled = true
-      print("Copilot Disabled (Privacy Mode)")
+      print 'Copilot Disabled (Privacy Mode)'
     end
   end, { desc = '[C]opilot [P]rivacy Toggle' })
 
