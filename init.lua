@@ -256,7 +256,7 @@ do
   end, { desc = 'Run cargo in a bottom terminal split' })
   -- Hotkey to open a small blank terminal at the bottom *
   vim.keymap.set('n', '<leader>tt', function()
-    vim.cmd 'botright 15split'
+    vim.cmd 'botright 13split'
     vim.cmd 'term'
     vim.cmd 'startinsert'
   end, { desc = '[T]oggle bottom [T]erminal' })
@@ -1162,7 +1162,8 @@ do
   -- Keymaps for iOS
   vim.keymap.set('n', '<leader>Xb', '<cmd>XcodebuildBuild<cr>', { desc = '[X]code [B]uild' })
   vim.keymap.set('n', '<leader>Xr', '<cmd>XcodebuildBuildRun<cr>', { desc = '[X]code Build & [R]un' })
-  vim.keymap.set('n', '<leader>Xs', '<cmd>XcodebuildSelectDevice<cr>', { desc = '[X]code [S]elect Device' })
+  vim.keymap.set('n', '<leader>Xd', '<cmd>XcodebuildSelectDevice<cr>', { desc = '[X]code Select [D]evice' })
+  vim.keymap.set('n', '<leader>Xs', '<cmd>XcodebuildSetup<cr>', { desc = '[X]code Build [S]etup' })
 
   -- Keymaps for iOS Debugging
   vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = '[D]ebug Toggle [B]reakpoint' })
