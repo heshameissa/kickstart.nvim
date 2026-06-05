@@ -1164,6 +1164,7 @@ do
   vim.keymap.set('n', '<leader>Xr', '<cmd>XcodebuildBuildRun<cr>', { desc = '[X]code Build & [R]un' })
   vim.keymap.set('n', '<leader>Xd', '<cmd>XcodebuildSelectDevice<cr>', { desc = '[X]code Select [D]evice' })
   vim.keymap.set('n', '<leader>Xs', '<cmd>XcodebuildSetup<cr>', { desc = '[X]code Build [S]etup' })
+  vim.keymap.set('n', '<leader>Xp', '<cmd>XcodebuildProjectManager<cr>', { desc = '[X]code Build [P]roject Manager' })
 
   -- Keymaps for iOS Debugging
   vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = '[D]ebug Toggle [B]reakpoint' })
