@@ -371,8 +371,8 @@ do
   -- like only installing a plugin if a condition is met.
   --
   -- Here we only install `nvim-web-devicons` (which adds pretty icons) if we have a Nerd Font,
-  -- since otherwise the icons won't display properly.
-  if vim.g.have_nerd_font then vim.pack.add { gh 'nvim-tree/nvim-web-devicons' } end
+  -- since otherwise the icons won't display properly. ** REMOVED
+  -- if vim.g.have_nerd_font then vim.pack.add { gh 'nvim-tree/nvim-web-devicons' } end
 
   -- Here is a more advanced configuration example that passes options to `gitsigns.nvim`
   --
@@ -434,6 +434,30 @@ do
   --  A collection of various small independent plugins/modules
   vim.pack.add { gh 'nvim-mini/mini.nvim' }
 
+  -- Force MiniIcons to use terminal ANSI colors instead of the colorscheme palette ** MY ADDITIONS
+  vim.api.nvim_set_hl(0, 'MiniIconsRed', { ctermfg = 1, fg = 'Red' })
+  vim.api.nvim_set_hl(0, 'MiniIconsGreen', { ctermfg = 2, fg = 'Green' })
+  vim.api.nvim_set_hl(0, 'MiniIconsYellow', { ctermfg = 3, fg = 'Yellow' })
+  vim.api.nvim_set_hl(0, 'MiniIconsBlue', { ctermfg = 4, fg = 'Blue' })
+  vim.api.nvim_set_hl(0, 'MiniIconsPurple', { ctermfg = 5, fg = 'Magenta' })
+  vim.api.nvim_set_hl(0, 'MiniIconsCyan', { ctermfg = 6, fg = 'Cyan' })
+  vim.api.nvim_set_hl(0, 'MiniIconsGrey', { ctermfg = 8, fg = 'LightGrey' })
+  vim.api.nvim_set_hl(0, 'MiniIconsOrange', { fg = '#F05138' }) -- Orange isn't a standard 16-color ANSI, keep your hex here
+
+-- If a nerd font is available, load the icons module for pretty icons in various plugins.
+  if vim.g.have_nerd_font then
+    -- require('mini.icons').setup()
+    vim.api.nvim_set_hl(0, 'CustomSwiftOrange', { fg = '#FF5F00' })
+    require('mini.icons').setup {
+      extension = {
+        -- Replace the glyph string with your preferred Swift icon.
+        -- Options: '' (Default devicon), '󰛥' (Material variant), '' (Alternate)
+        swift = { glyph = '', hl = 'CustomSwiftOrange' },
+      },
+    }
+    -- Used for backwards compatibility with plugins that require `nvim-web-devicons` (e.g. telescope.nvim)
+    MiniIcons.mock_nvim_web_devicons()
+  end
   -- Better Around/Inside textobjects
   --
   -- Examples:
