@@ -789,7 +789,7 @@ do
   ---@type table<string, vim.lsp.Config>
   local servers = {
     -- clangd = {},
-    -- gopls = {},
+    gopls = {},
     -- pyright = {},
     -- rust_analyzer = {},
     -- sourcekit = {},
@@ -861,6 +861,9 @@ do
     -- You can add other tools here that you want Mason to install
     'xcode-build-server', -- Force Mason to sync this via Git! *
     'codelldb',
+    'gofumpt', -- Go formatter
+    'goimports', -- Go import organizer
+    'delve', -- Go debug adapter (dlv)
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -901,6 +904,7 @@ do
     -- You can also specify external formatters in here.
     formatters_by_ft = {
       rust = { 'rustfmt' },
+      go = { 'goimports', 'gofumpt' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
@@ -1066,7 +1070,7 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed *
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust', 'swift' }
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust', 'swift', 'go', 'gomod' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -1181,6 +1185,11 @@ do
   dap.listeners.before.launch.dapui_config = function() dapui.open() end
   dap.listeners.before.event_terminated.dapui_config = function() dapui.close() end
   dap.listeners.before.event_exited.dapui_config = function() dapui.close() end
+
+ -- [[ Go Development & Debugging ]]
+  vim.pack.add { gh 'leoluz/nvim-dap-go' }
+  require('dap-go').setup()
+  vim.keymap.set('n', '<leader>dgt', function() require('dap-go').debug_test() end, { desc = '[D]ebug [G]o [T]est' })
 
   -- [[ Use Apple's Native lldb-dap for Swift 6.0+ ]]
   local xcodebuild_dap = require 'xcodebuild.integrations.dap'
