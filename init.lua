@@ -444,7 +444,7 @@ do
   vim.api.nvim_set_hl(0, 'MiniIconsGrey', { ctermfg = 8, fg = 'LightGrey' })
   vim.api.nvim_set_hl(0, 'MiniIconsOrange', { fg = '#F05138' }) -- Orange isn't a standard 16-color ANSI, keep your hex here
 
--- If a nerd font is available, load the icons module for pretty icons in various plugins.
+  -- If a nerd font is available, load the icons module for pretty icons in various plugins.
   if vim.g.have_nerd_font then
     -- require('mini.icons').setup()
     vim.api.nvim_set_hl(0, 'CustomSwiftOrange', { fg = '#FF5F00' })
@@ -790,7 +790,12 @@ do
   local servers = {
     -- clangd = {},
     gopls = {},
-    -- pyright = {},
+    jsonls = {}, -- JSON language server
+    yamlls = {}, -- YAML language server
+    sqls = {}, -- SQL language server
+    dockerls = {}, -- Dockerfile language server
+    docker_compose_language_service = {}, -- Docker Compose language server
+    pyright = {}, -- Python language server
     -- rust_analyzer = {},
     -- sourcekit = {},
     --
@@ -864,6 +869,11 @@ do
     'gofumpt', -- Go formatter
     'goimports', -- Go import organizer
     'delve', -- Go debug adapter (dlv)
+    'prettier', -- Formatter for Json and Yaml (and more)
+    'sqlfluff', -- SQL linter and formatter
+    'black', -- Python code formatter
+    'isort', -- Python import sorter
+    'debugpy', -- Python Debugger
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -905,6 +915,10 @@ do
     formatters_by_ft = {
       rust = { 'rustfmt' },
       go = { 'goimports', 'gofumpt' },
+      json = { 'prettier' },
+      yaml = { 'prettier' },
+      sql = { 'sqlfluff' },
+      python = { 'isort', 'black' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
@@ -1037,7 +1051,10 @@ do
     },
 
     sources = {
-      default = { 'lsp', 'path', 'snippets' },
+      default = { 'lsp', 'path', 'snippets', 'dadbod'},
+      providers = {
+        dadbod = { name = 'Dadbod', module = 'vim_dadbod_completion.blink' },
+    },
     },
 
     snippets = { preset = 'luasnip' },
@@ -1070,7 +1087,28 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed *
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust', 'swift', 'go', 'gomod' }
+  local parsers = {
+    'bash',
+    'c',
+    'diff',
+    'html',
+    'lua',
+    'luadoc',
+    'markdown',
+    'markdown_inline',
+    'query',
+    'vim',
+    'vimdoc',
+    'rust',
+    'swift',
+    'go',
+    'gomod',
+    'sql',
+    'yaml',
+    'json',
+    'dockerfile',
+    'python',
+  }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -1124,8 +1162,8 @@ do
 end
 
 -- ============================================================
--- SECTION 9: OPTIONAL EXAMPLES / NEXT STEPS
--- kickstart.plugins.* examples
+-- SECTION 9: DEBUGGING & EXTENSIONS
+-- kickstart.plugins.* examplessection 9
 -- ============================================================
 do
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
@@ -1186,10 +1224,20 @@ do
   dap.listeners.before.event_terminated.dapui_config = function() dapui.close() end
   dap.listeners.before.event_exited.dapui_config = function() dapui.close() end
 
- -- [[ Go Development & Debugging ]]
+  -- [[ Go Development & Debugging ]]
   vim.pack.add { gh 'leoluz/nvim-dap-go' }
   require('dap-go').setup()
   vim.keymap.set('n', '<leader>dgt', function() require('dap-go').debug_test() end, { desc = '[D]ebug [G]o [T]est' })
+
+  -- [[ Python Development & Debugging ]]
+  vim.pack.add { gh 'mfussenegger/nvim-dap-python' }
+
+  -- Initialize Python debugging (points to Mason's downloaded debugpy path)
+  local debugpy_path = vim.fn.stdpath 'data' .. '/mason/packages/debugpy/venv/bin/python'
+  require('dap-python').setup(debugpy_path)
+
+  -- Keymap to debug a Python script
+  vim.keymap.set('n', '<leader>dp', function() require('dap-python').test_method() end, { desc = '[D]ebug [P]ython Method' })
 
   -- [[ Use Apple's Native lldb-dap for Swift 6.0+ ]]
   local xcodebuild_dap = require 'xcodebuild.integrations.dap'
@@ -1216,3 +1264,21 @@ end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- ============================================================
+-- SECTION 10: DATABASE TOOLING
+-- vim-dadbod stack
+-- ============================================================
+vim.pack.add {
+  gh 'tpope/vim-dadbod',
+  gh 'kristijanhusak/vim-dadbod-ui',
+  gh 'kristijanhusak/vim-dadbod-completion',
+}
+
+-- Configure the UI
+vim.g.db_ui_save_location = vim.fn.stdpath 'data' .. '/db_ui'
+vim.g.db_ui_use_nerd_fonts = 1
+
+-- Keymap to toggle the database explorer sidebar
+-- (Using <leader>du because <leader>db is used by your iOS Debugger)
+vim.keymap.set('n', '<leader>du', '<cmd>DBUIToggle<CR>', { desc = 'Toggle [D]atabase [U]I' })
