@@ -389,6 +389,11 @@ do
     },
   }
 
+  vim.pack.add { gh 'MeanderingProgrammer/render-markdown.nvim' }
+  require('render-markdown').setup {
+    -- Relies on treesitter and mini.icons you already installed
+  }
+
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
   require('which-key').setup {
@@ -796,6 +801,7 @@ do
     dockerls = {}, -- Dockerfile language server
     docker_compose_language_service = {}, -- Docker Compose language server
     pyright = {}, -- Python language server
+    marksman = {}, -- Markdown language server
     -- rust_analyzer = {},
     -- sourcekit = {},
     --
@@ -919,6 +925,7 @@ do
       yaml = { 'prettier' },
       sql = { 'sqlfluff' },
       python = { 'isort', 'black' },
+      markdown = { 'prettier' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
@@ -1051,10 +1058,10 @@ do
     },
 
     sources = {
-      default = { 'lsp', 'path', 'snippets', 'dadbod'},
+      default = { 'lsp', 'path', 'snippets', 'dadbod' },
       providers = {
         dadbod = { name = 'Dadbod', module = 'vim_dadbod_completion.blink' },
-    },
+      },
     },
 
     snippets = { preset = 'luasnip' },
