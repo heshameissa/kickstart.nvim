@@ -926,6 +926,7 @@ do
       sql = { 'sqlfluff' },
       python = { 'isort', 'black' },
       markdown = { 'prettier' },
+      lua = { 'stylua' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
@@ -962,6 +963,18 @@ do
   -- [ADD CO-PILOT] *
   vim.pack.add { gh 'zbirenbaum/copilot.lua' }
 
+  -- Files Copilot should never attach to (secrets, keys, prose) *
+  local function copilot_is_blocked(bufname)
+    local name = vim.fs.basename(bufname or '')
+    if name == '' then return false end
+    return name:match '^%.env' -- .env, .envrc, .env.local
+      or name:match '%.env$' -- prod.env
+      or name:match '%.env%.' -- foo.env.local
+      or name:match '%.p8$' -- Apple auth keys (AuthKey_XXX.p8)
+      or name:match '%.md$'
+      or name:match '%.markdown$'
+  end
+
   require('copilot').setup {
     suggestion = {
       enabled = true,
@@ -974,6 +987,14 @@ do
       },
     },
     panel = { enabled = false }, -- We don't want the clunky side-panel
+    should_attach = function(bufnr, bufname)
+      -- NOTE: overriding this replaces the plugin's default, so re-assert its two
+      -- base checks: skip unlisted buffers and special buftypes (terminals, etc.)
+      if not vim.bo[bufnr].buflisted then return false end
+      if vim.bo[bufnr].buftype ~= '' then return false end
+      if copilot_is_blocked(bufname) then return false end
+      return true
+    end,
     -- ADD THIS BLOCK TO DISABLE TELEMETRY
     server_opts_overrides = {
       settings = {
@@ -1207,13 +1228,6 @@ do
 
   require('xcodebuild').setup {
     show_build_progress_bar = true,
-    code_coverage = {
-      enabled = true,
-    },
-  }
-
-  require('xcodebuild').setup {
-    show_build_progress_bar = true,
     code_coverage = { enabled = true },
     integrations = {
       dap = {
@@ -1276,16 +1290,21 @@ end
 -- SECTION 10: DATABASE TOOLING
 -- vim-dadbod stack
 -- ============================================================
-vim.pack.add {
-  gh 'tpope/vim-dadbod',
-  gh 'kristijanhusak/vim-dadbod-ui',
-  gh 'kristijanhusak/vim-dadbod-completion',
-}
+do
+  vim.pack.add {
+    gh 'tpope/vim-dadbod',
+    gh 'kristijanhusak/vim-dadbod-ui',
+    gh 'kristijanhusak/vim-dadbod-completion',
+  }
 
--- Configure the UI
-vim.g.db_ui_save_location = vim.fn.stdpath 'data' .. '/db_ui'
-vim.g.db_ui_use_nerd_fonts = 1
+  -- Configure the UI
+  vim.g.db_ui_save_location = vim.fn.stdpath 'data' .. '/db_ui'
+  vim.g.db_ui_use_nerd_fonts = 1
 
--- Keymap to toggle the database explorer sidebar
--- (Using <leader>du because <leader>db is used by your iOS Debugger)
-vim.keymap.set('n', '<leader>du', '<cmd>DBUIToggle<CR>', { desc = 'Toggle [D]atabase [U]I' })
+  -- Keymap to toggle the database explorer sidebar
+  -- (Using <leader>du because <leader>db is used by your iOS Debugger)
+  vim.keymap.set('n', '<leader>du', '<cmd>DBUIToggle<CR>', { desc = 'Toggle [D]atabase [U]I' })
+end
+
+-- The line beneath this is called `modeline`. See `:help modeline`
+-- vim: ts=2 sts=2 sw=2 et
